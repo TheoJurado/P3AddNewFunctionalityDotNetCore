@@ -89,7 +89,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
                 _productRepository.UpdateProductStocks(line.Product.Id, line.Quantity);
             }
         }
-
+        /*
         // TODO this is an example method, remove it and perform model validation using data annotations
         public List<string> CheckProductModelErrors(ProductViewModel product)
         {
@@ -130,7 +130,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
             }
 
             return modelErrors;
-        }
+        }/**/
 
         public void SaveProduct(ProductViewModel product)
         {
