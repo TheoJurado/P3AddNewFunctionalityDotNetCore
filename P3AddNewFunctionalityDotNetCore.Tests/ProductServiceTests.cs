@@ -1,6 +1,15 @@
-﻿using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+﻿using Microsoft.EntityFrameworkCore;
+using Moq;
+using P3AddNewFunctionalityDotNetCore.Data;
+using P3AddNewFunctionalityDotNetCore.Models;
+using P3AddNewFunctionalityDotNetCore.Models.Entities;
+using P3AddNewFunctionalityDotNetCore.Models.Repositories;
+using P3AddNewFunctionalityDotNetCore.Models.Services;
+using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
@@ -12,6 +21,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         /// A test method must check if a definite method does its job:
         /// returns an expected value from a particular set of parameters
         /// </summary>
+
         #region name
         [Fact]
         public void TestNameEmpty()
@@ -296,7 +306,42 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         }
         #endregion
 
-        //Tester si l'ajout de produit a bien un impact sur la base de donnée
+        private DbContextOptions<P3Referential> CreateInMemoryDatabaseOptions()
+        {
+            return new DbContextOptionsBuilder<P3Referential>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
+        }
+        
+        [Fact]
+        public async Task AddProduct_ShouldAddProductToDatabase()
+        {
+            // Arrange
+            var options = CreateInMemoryDatabaseOptions();
+            using var context = new P3Referential(options);
+            var productRepository = new ProductRepository(context);
+            //Mok for ProductService
+            var mockCart = new Mock<ICart>();
+            var productService = new ProductService(mockCart.Object, productRepository);
+
+            var newProduct = new ProductViewModel
+            {
+                Id = 850,
+                Name = "Test Product",
+                Description = "description",
+                Stock = "10",
+                Price = "20"
+            };
+
+            // Act
+            productService.SaveProduct(newProduct);
+            await context.SaveChangesAsync();
+
+            // Assert
+            Assert.Equal(1, await context.Product.CountAsync());
+            Assert.Equal("Test Product", (await context.Product.FirstAsync()).Name);
+        }
+
         //Tester si la suppression de produit a bien un impact sur base de donnée
 
         //Tester ce qu'il se passe si un produit est supprimé de la DB pendant qu'il est dans un panier d'un client
