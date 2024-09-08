@@ -155,6 +155,27 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotAnInteger");
         }
         [Fact]
+        public void TestStockDoubleAndNotInt()
+        {
+            //Arrange
+            ProductViewModel productViewModel = new ProductViewModel
+            {
+                Id = 850,
+                Name = "testName",
+                Description = "description",
+                Stock = "10.5",
+                Price = "20"
+            };
+
+            // Act: Manually validate the model
+            var validationContext = new ValidationContext(productViewModel, null, null);
+            var validationResults = new List<ValidationResult>();
+            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
+
+            // Assert: Check if validation failed and contains the "StockNotAnInteger" error
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotAnInteger");
+        }
+        [Fact]
         public void TestStockNegative()
         {
             //Arrange
