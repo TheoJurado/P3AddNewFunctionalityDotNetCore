@@ -14,16 +14,15 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
     {
         private readonly ICart _cart;
         private readonly IProductRepository _productRepository;
-        private readonly IOrderRepository _orderRepository;
-        private readonly IStringLocalizer<ProductService> _localizer;
+        //private readonly IOrderRepository _orderRepository;
+        //private readonly IStringLocalizer<ProductService> _localizer;
 
-        public ProductService(ICart cart, IProductRepository productRepository,
-            IOrderRepository orderRepository, IStringLocalizer<ProductService> localizer)
+        public ProductService(ICart cart, IProductRepository productRepository)
         {
             _cart = cart;
             _productRepository = productRepository;
-            _orderRepository = orderRepository;
-            _localizer = localizer;
+            //_orderRepository = orderRepository;
+            //_localizer = localizer;
         }
         public List<ProductViewModel> GetAllProductsViewModel()
         {
