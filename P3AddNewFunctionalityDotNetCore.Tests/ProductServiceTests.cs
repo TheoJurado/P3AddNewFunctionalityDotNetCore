@@ -217,6 +217,27 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             // Assert: Check if validation failed and contains the "StockNotGreaterThanZero" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotGreaterThanZero");
         }
+        [Fact]
+        public void TestStockNull()
+        {
+            //Arrange
+            ProductViewModel productViewModel = new ProductViewModel
+            {
+                Id = 850,
+                Name = "testName",
+                Description = "description",
+                Stock = null,
+                Price = "20"
+            };
+
+            // Act: Manually validate the model
+            var validationContext = new ValidationContext(productViewModel, null, null);
+            var validationResults = new List<ValidationResult>();
+            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
+
+            // Assert: Check if validation failed and contains the "MissingStock" error
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingStock");
+        }
         #endregion
 
         #region price
@@ -324,6 +345,27 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             // Assert: Check if validation failed and contains the "PriceNotGreaterThanZero" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotGreaterThanZero");
+        }
+        [Fact]
+        public void TestPriceNull()
+        {
+            //Arrange
+            ProductViewModel productViewModel = new ProductViewModel
+            {
+                Id = 850,
+                Name = "testName",
+                Description = "description",
+                Stock = "10",
+                Price = null
+            };
+
+            // Act: Manually validate the model
+            var validationContext = new ValidationContext(productViewModel, null, null);
+            var validationResults = new List<ValidationResult>();
+            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
+
+            // Assert: Check if validation failed and contains the "MissingPrice" error
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingPrice");
         }
         #endregion
 
