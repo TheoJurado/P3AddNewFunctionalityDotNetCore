@@ -343,6 +343,37 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         }
 
         //Tester si la suppression de produit a bien un impact sur base de donnée
+        [Fact]
+        public async Task DeleteProduct_ShouldRemoveProductFromDatabase()
+        {
+            // Arrange
+            var options = CreateInMemoryDatabaseOptions();
+            using var context = new P3Referential(options);
+            var productRepository = new ProductRepository(context);
+            // Mok for ProductService
+            var mockCart = new Mock<ICart>();
+            var productService = new ProductService(mockCart.Object, productRepository);
+
+            // Add a product to be able to delete it
+            var productToAdd = new Product
+            {
+                Id = 851,
+                Name = "Product To Delete",
+                Description = "description",
+                Quantity = 10,
+                Price = 20
+            };
+            context.Product.Add(productToAdd);
+            await context.SaveChangesAsync();
+
+            // Act
+            productService.DeleteProduct(productToAdd.Id);
+            await context.SaveChangesAsync();
+
+            // Assert
+            Assert.Equal(0, await context.Product.CountAsync()); // Make sure there are no more products
+            Assert.False(await context.Product.AnyAsync(p => p.Id == productToAdd.Id)); // Check that the product is deleted correctly
+        }
 
         //Tester ce qu'il se passe si un produit est supprimé de la DB pendant qu'il est dans un panier d'un client
 
