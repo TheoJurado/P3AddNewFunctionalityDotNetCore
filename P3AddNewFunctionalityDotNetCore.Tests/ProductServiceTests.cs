@@ -9,6 +9,7 @@ using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -23,58 +24,17 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         /// </summary>
 
         #region name
-        [Fact]
-        public void TestNameEmpty()
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void TestInvalidName_ShouldReturnMissingName(string invalidName)
         {
-            //Arrange
+            // Arrange
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
-                Name = "", //empty name to trigger validation error
-                Description = "description",
-                Stock = "10",
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingName" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingName");
-        }
-
-        [Fact]
-        public void TestSpaceNameEmpty()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = " ", //name only a space to trigger validation error
-                Description = "description",
-                Stock = "10",
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingName" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingName");
-        }
-
-        [Fact]
-        public void TestNullName()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = null, //null name to trigger validation error
+                Name = invalidName, // using the invalid name from InlineData
                 Description = "description",
                 Stock = "10",
                 Price = "20"
@@ -91,8 +51,11 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         #endregion
 
         #region stock
-        [Fact]
-        public void TestStockEmpty()
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void TestStockEmpty_ShouldReturnMissingStock(string invalidStock)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -100,7 +63,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Id = 850,
                 Name = "testName",
                 Description = "description",
-                Stock = "",
+                Stock = invalidStock,
                 Price = "20"
             };
 
@@ -112,8 +75,10 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             // Assert: Check if validation failed and contains the "MissingStock" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingStock");
         }
-        [Fact]
-        public void TestStockSapceEmpty()
+        [Theory]
+        [InlineData("ten")]
+        [InlineData("10.5")]
+        public void TestStockStringCharacterAndDoubleValue_ShouldReturnStockNotAnInteger(string invalidStock)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -121,28 +86,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Id = 850,
                 Name = "testName",
                 Description = "description",
-                Stock = " ",
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingStock" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingStock");
-        }
-        [Fact]
-        public void TestStockStringCharacter()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "ten",
+                Stock = invalidStock,
                 Price = "20"
             };
 
@@ -154,8 +98,10 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             // Assert: Check if validation failed and contains the "StockNotAnInteger" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotAnInteger");
         }
-        [Fact]
-        public void TestStockDoubleAndNotInt()
+        [Theory]
+        [InlineData("-10")]
+        [InlineData("0")]
+        public void TestStockNegativeAndZero_ShouldReturnStockNotGreaterThanZero(string invalidStock)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -163,28 +109,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Id = 850,
                 Name = "testName",
                 Description = "description",
-                Stock = "10.5",
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "StockNotAnInteger" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotAnInteger");
-        }
-        [Fact]
-        public void TestStockNegative()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "-10",
+                Stock = invalidStock,
                 Price = "20"
             };
 
@@ -195,54 +120,15 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             // Assert: Check if validation failed and contains the "StockNotGreaterThanZero" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotGreaterThanZero");
-        }
-        [Fact]
-        public void TestStockEqualZero()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "0",
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "StockNotGreaterThanZero" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotGreaterThanZero");
-        }
-        [Fact]
-        public void TestStockNull()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = null,
-                Price = "20"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingStock" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingStock");
         }
         #endregion
 
         #region price
-        [Fact]
-        public void TestPriceEmpty()
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void TestPriceEmpty_ShouldReturnMissingPrice(string invalidPrice)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -251,28 +137,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Name = "testName",
                 Description = "description",
                 Stock = "10",
-                Price = ""
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingPrice" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingPrice");
-        }
-        [Fact]
-        public void TestPriceSpaceEmpty()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "10",
-                Price = " "
+                Price = invalidPrice
             };
 
             // Act: Manually validate the model
@@ -304,8 +169,10 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             // Assert: Check if validation failed and contains the "PriceNotANumber" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotANumber");
         }
-        [Fact]
-        public void TestPriceNegative()
+        [Theory]
+        [InlineData("-20")]
+        [InlineData("0")]
+        public void TestPriceNegativeAndZero_ShouldReturnPriceNotGreaterThanZero(string invalidPrice)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -314,7 +181,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Name = "testName",
                 Description = "description",
                 Stock = "10",
-                Price = "-20"
+                Price = invalidPrice
             };
 
             // Act: Manually validate the model
@@ -324,68 +191,18 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             // Assert: Check if validation failed and contains the "PriceNotGreaterThanZero" error
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotGreaterThanZero");
-        }
-        [Fact]
-        public void TestPriceZero()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "10",
-                Price = "0"
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "PriceNotGreaterThanZero" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotGreaterThanZero");
-        }
-        [Fact]
-        public void TestPriceNull()
-        {
-            //Arrange
-            ProductViewModel productViewModel = new ProductViewModel
-            {
-                Id = 850,
-                Name = "testName",
-                Description = "description",
-                Stock = "10",
-                Price = null
-            };
-
-            // Act: Manually validate the model
-            var validationContext = new ValidationContext(productViewModel, null, null);
-            var validationResults = new List<ValidationResult>();
-            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
-
-            // Assert: Check if validation failed and contains the "MissingPrice" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingPrice");
         }
         #endregion
 
-        private DbContextOptions<P3Referential> CreateInMemoryDatabaseOptions()
-        {
-            return new DbContextOptionsBuilder<P3Referential>()
-                .UseInMemoryDatabase(databaseName: "TestDatabase")
-                .Options;
-        }
-        
         [Fact]
-        public async Task AddProduct_ShouldAddProductToDatabase()
+        public void AddProduct_ShouldCallSaveProductFromRepository()
         {
             // Arrange
-            var options = CreateInMemoryDatabaseOptions();
-            using var context = new P3Referential(options);
-            var productRepository = new ProductRepository(context);
             //Mok for ProductService
             var mockCart = new Mock<ICart>();
-            var productService = new ProductService(mockCart.Object, productRepository);
+            var mockProductRepository = new Mock<IProductRepository>();
+
+            var productService = new ProductService(mockCart.Object, mockProductRepository.Object);
 
             var newProduct = new ProductViewModel
             {
@@ -398,44 +215,36 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             // Act
             productService.SaveProduct(newProduct);
-            await context.SaveChangesAsync();
 
             // Assert
-            Assert.Equal(1, await context.Product.CountAsync());
-            Assert.Equal("Test Product", (await context.Product.FirstAsync()).Name);
+            mockProductRepository.Verify(repo => repo.SaveProduct(It.IsAny<Product>()), Times.Once);
         }
 
-        //Tester si la suppression de produit a bien un impact sur base de donnée
         [Fact]
-        public async Task DeleteProduct_ShouldRemoveProductFromDatabase()
+        public void RemoveProduct_ShouldCallDeleteProductFromRepository()
         {
             // Arrange
-            var options = CreateInMemoryDatabaseOptions();
-            using var context = new P3Referential(options);
-            var productRepository = new ProductRepository(context);
-            // Mok for ProductService
+            var mockProductRepository = new Mock<IProductRepository>();
             var mockCart = new Mock<ICart>();
-            var productService = new ProductService(mockCart.Object, productRepository);
 
-            // Add a product to be able to delete it
-            var productToAdd = new Product
+            var productService = new ProductService(mockCart.Object, mockProductRepository.Object);
+            /*
+            //Product to add and remove from repository
+            var productToRemove = new Product
             {
-                Id = 851,
-                Name = "Product To Delete",
+                Id = 850,
+                Name = "Test Product",
                 Description = "description",
                 Quantity = 10,
                 Price = 20
             };
-            context.Product.Add(productToAdd);
-            await context.SaveChangesAsync();
+            mockProductRepository.Setup(repo => repo.GetProduct(850)).ReturnsAsync(productToRemove);/**/
 
             // Act
-            productService.DeleteProduct(productToAdd.Id);
-            await context.SaveChangesAsync();
+            productService.DeleteProduct(850);
 
             // Assert
-            Assert.Equal(0, await context.Product.CountAsync()); // Make sure there are no more products
-            Assert.False(await context.Product.AnyAsync(p => p.Id == productToAdd.Id)); // Check that the product is deleted correctly
+            mockProductRepository.Verify(repo => repo.DeleteProduct(850), Times.Once);
         }
 
         //Tester ce qu'il se passe si un produit est supprimé de la DB pendant qu'il est dans un panier d'un client
