@@ -124,7 +124,7 @@
     <value>Veillez renseinger un prix</value>
   </data>
   <data name="MissingStock" xml:space="preserve">
-    <value>Veillez rensigner le stock</value>
+    <value>Veillez renseigner le stock</value>
   </data>
   <data name="PriceNotANumber" xml:space="preserve">
     <value>Le prix n'est pas un nombre</value>
