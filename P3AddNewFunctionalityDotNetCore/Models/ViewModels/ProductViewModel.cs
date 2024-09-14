@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.ComponentModel.DataAnnotations;
+using P3AddNewFunctionalityDotNetCore.Models.ViewModels.Attributes;
 
 namespace P3AddNewFunctionalityDotNetCore.Models.ViewModels
 {
@@ -23,41 +24,5 @@ namespace P3AddNewFunctionalityDotNetCore.Models.ViewModels
         [Required(ErrorMessage = "MissingPrice")]
         [PriceValidation(ErrorMessage = "PriceNotANumber", GreaterThanZeroErrorMessage = "PriceNotGreaterThanZero")]
         public string Price { get; set; }
-    }
-
-    public class PriceValidationAttribute : ValidationAttribute
-    {
-        public string GreaterThanZeroErrorMessage { get; set; }
-
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            if (value == null || !Double.TryParse(value.ToString(), out double price))
-            {
-                return new ValidationResult(ErrorMessage);
-            }
-            if (price <= 0)
-            {
-                return new ValidationResult(GreaterThanZeroErrorMessage);
-            }
-            return ValidationResult.Success;
-        }
-    }
-
-    public class StockValidationAttribute : ValidationAttribute
-    {
-        public string GreaterThanZeroErrorMessage { get; set; }
-
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            if (value == null || !int.TryParse(value.ToString(), out int stock))
-            {
-                return new ValidationResult(ErrorMessage);
-            }
-            if (stock <= 0)
-            {
-                return new ValidationResult(GreaterThanZeroErrorMessage);
-            }
-            return ValidationResult.Success;
-        }
     }
 }
