@@ -12,6 +12,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using System.Resources;
+using P3AddNewFunctionalityDotNetCore.Models.ViewModels.Attributes;
+using System.Globalization;
+using Xunit.Sdk;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
@@ -25,16 +29,16 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
         #region name
         [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData(null)]
-        public void TestInvalidName_ShouldReturnMissingName(string invalidName)
+        [InlineData("", "MissingName")]
+        [InlineData(" ", "MissingName")]
+        [InlineData(null, "MissingName")]
+        public void TestInvalidName_ShouldReturnMissingName(string inputName, string expectedResult)
         {
             // Arrange
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
-                Name = invalidName, // using the invalid name from InlineData
+                Name = inputName, // using the invalid name from InlineData
                 Description = "description",
                 Stock = "10",
                 Price = "20"
@@ -46,16 +50,16 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "MissingName" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingName");
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == expectedResult);
         }
         #endregion
 
         #region stock
         [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData(null)]
-        public void TestStockEmpty_ShouldReturnMissingStock(string invalidStock)
+        [InlineData("", "MissingStock")]
+        [InlineData(" ", "MissingStock")]
+        [InlineData(null, "MissingStock")]
+        public void TestStockEmpty_ShouldReturnMissingStock(string inputStock, string expectedResult)
         {
             //Arrange
             ProductViewModel productViewModel = new ProductViewModel
@@ -63,7 +67,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Id = 850,
                 Name = "testName",
                 Description = "description",
-                Stock = invalidStock,
+                Stock = inputStock,
                 Price = "20"
             };
 
@@ -73,14 +77,18 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "MissingStock" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingStock");
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == expectedResult);
         }
         [Theory]
         [InlineData("ten")]
         [InlineData("10.5")]
         public void TestStockStringCharacterAndDoubleValue_ShouldReturnStockNotAnInteger(string invalidStock)
         {
-            //Arrange
+            //Arrange localizer
+            ResourceManager ResourceManager =
+            new ResourceManager("P3AddNewFunctionalityDotNetCore.Resources.Models.ViewModels.ProductViewModel",
+                                typeof(StockValidationAttribute).Assembly);
+            //Arrange product
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
@@ -96,14 +104,18 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "StockNotAnInteger" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotAnInteger");
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == ResourceManager.GetString("StockNotAnInteger", CultureInfo.CurrentUICulture));
         }
         [Theory]
         [InlineData("-10")]
         [InlineData("0")]
         public void TestStockNegativeAndZero_ShouldReturnStockNotGreaterThanZero(string invalidStock)
         {
-            //Arrange
+            //Arrange localizer
+            ResourceManager ResourceManager =
+            new ResourceManager("P3AddNewFunctionalityDotNetCore.Resources.Models.ViewModels.ProductViewModel",
+                                typeof(StockValidationAttribute).Assembly);
+            //Arrange product
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
@@ -119,7 +131,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "StockNotGreaterThanZero" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "StockNotGreaterThanZero");
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == ResourceManager.GetString("StockNotGreaterThanZero", CultureInfo.CurrentUICulture));
         }
         #endregion
 
@@ -149,16 +161,20 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Assert.Contains(validationResults, vr => vr.ErrorMessage == "MissingPrice");
         }
         [Fact]
-        public void TestPriceStringCharacter()
+        public void TestPriceStringCharacter_ShouldReturnPriceNotANmuber()
         {
-            //Arrange
+            //Arrange localizer
+            ResourceManager ResourceManager =
+            new ResourceManager("P3AddNewFunctionalityDotNetCore.Resources.Models.ViewModels.ProductViewModel",
+                                typeof(StockValidationAttribute).Assembly);
+            //Arrange product
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
                 Name = "testName",
                 Description = "description",
                 Stock = "10",
-                Price = "twenty"
+                Price = "twenty"//price not a number
             };
 
             // Act: Manually validate the model
@@ -167,14 +183,19 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "PriceNotANumber" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotANumber");
+            Assert.Contains(validationResults,
+                vr => vr.ErrorMessage == ResourceManager.GetString("PriceNotANumber", CultureInfo.CurrentUICulture));
         }
         [Theory]
         [InlineData("-20")]
         [InlineData("0")]
         public void TestPriceNegativeAndZero_ShouldReturnPriceNotGreaterThanZero(string invalidPrice)
         {
-            //Arrange
+            //Arrange localizer
+            ResourceManager ResourceManager =
+            new ResourceManager("P3AddNewFunctionalityDotNetCore.Resources.Models.ViewModels.ProductViewModel",
+                                typeof(StockValidationAttribute).Assembly);
+            //Arrange product
             ProductViewModel productViewModel = new ProductViewModel
             {
                 Id = 850,
@@ -190,9 +211,32 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
 
             // Assert: Check if validation failed and contains the "PriceNotGreaterThanZero" error
-            Assert.Contains(validationResults, vr => vr.ErrorMessage == "PriceNotGreaterThanZero");
+            Assert.Contains(validationResults, vr => vr.ErrorMessage == ResourceManager.GetString("PriceNotGreaterThanZero", CultureInfo.CurrentUICulture));
         }
         #endregion
+
+
+        [Fact]
+        public void TestValidProduct_ShouldReturnNoError()
+        {
+            // Arrange
+            ProductViewModel productViewModel = new ProductViewModel
+            {
+                Id = 850,
+                Name = "Test Product",
+                Description = "description",
+                Stock = "10",
+                Price = "20"
+            };
+
+            // Act: Manually validate the model
+            var validationContext = new ValidationContext(productViewModel, null, null);
+            var validationResults = new List<ValidationResult>();
+            Validator.TryValidateObject(productViewModel, validationContext, validationResults, true);
+
+            // Assert: Check if validation success
+            Assert.True(Validator.TryValidateObject(productViewModel, validationContext, validationResults, true));
+        }
 
         [Fact]
         public void AddProduct_ShouldCallSaveProductFromRepository()
@@ -220,15 +264,16 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             mockProductRepository.Verify(repo => repo.SaveProduct(It.IsAny<Product>()), Times.Once);
         }
 
+        //Tester ce qu'il se passe si un produit est supprimé de la DB pendant qu'il est dans un panier d'un client
         [Fact]
-        public void RemoveProduct_ShouldCallDeleteProductFromRepository()
+        public void RemoveProductWhileInCart_ShouldCallDeleteProductFromRepositoryAndRemoveLineFromCart()
         {
             // Arrange
             var mockProductRepository = new Mock<IProductRepository>();
             var mockCart = new Mock<ICart>();
 
             var productService = new ProductService(mockCart.Object, mockProductRepository.Object);
-            /*
+            
             //Product to add and remove from repository
             var productToRemove = new Product
             {
@@ -238,19 +283,36 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Quantity = 10,
                 Price = 20
             };
-            mockProductRepository.Setup(repo => repo.GetProduct(850)).ReturnsAsync(productToRemove);/**/
+            IEnumerable<Product> theProducts = new List<Product> { productToRemove };
+            mockProductRepository.Setup(repository => repository.GetAllProducts()).Returns(theProducts);
 
             // Act
             productService.DeleteProduct(850);
 
             // Assert
+            mockCart.Verify(repo => repo.RemoveLine(productService.GetProductById(850)), Times.Once);
             mockProductRepository.Verify(repo => repo.DeleteProduct(850), Times.Once);
         }
 
-        //Tester ce qu'il se passe si un produit est supprimé de la DB pendant qu'il est dans un panier d'un client
 
 
+        [Fact]
+        public void RemoveInexistedProduct_ShouldNoCallDeleteProductFromRepository()
+        {
+            // Arrange
+            var mockProductRepository = new Mock<IProductRepository>();
+            var mockCart = new Mock<ICart>();
 
+            var productService = new ProductService(mockCart.Object, mockProductRepository.Object);
+
+            // Act
+            productService.DeleteProduct(850);
+
+            // Assert
+            mockProductRepository.Verify(repo => repo.DeleteProduct(850), Times.Never);
+        }
+
+        /*
         [Fact]
         public void ExampleMethod()
         {
@@ -261,6 +323,6 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             // Assert
             Assert.Equal(1, 1);
-        }
+        }/**/
     }
 }

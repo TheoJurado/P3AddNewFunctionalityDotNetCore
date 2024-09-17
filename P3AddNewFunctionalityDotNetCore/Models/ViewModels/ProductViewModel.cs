@@ -17,7 +17,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.ViewModels
 
         public string Details { get; set; }
 
-        [Required(ErrorMessage = "MissingStock")]
+        [Required(ErrorMessage = "MissingStock")]//"MissingStock"
         [StockValidation(ErrorMessage = "StockNotAnInteger", GreaterThanZeroErrorMessage = "StockNotGreaterThanZero")]
         public string Stock { get; set; }
 
