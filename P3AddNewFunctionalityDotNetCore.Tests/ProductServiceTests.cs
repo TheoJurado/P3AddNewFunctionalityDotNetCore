@@ -16,6 +16,8 @@ using System.Resources;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels.Attributes;
 using System.Globalization;
 using Xunit.Sdk;
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
@@ -311,6 +313,108 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             // Assert
             mockProductRepository.Verify(repo => repo.DeleteProduct(850), Times.Never);
         }
+
+        #region DataBaseTest
+        private DbContextOptions<P3Referential> CreateSqlDatabaseOptions()
+        {
+            return new DbContextOptionsBuilder<P3Referential>()
+                .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=TestDatabase;Trusted_Connection=True;")
+                .Options;
+        }
+        private IConfiguration CreateMockConfiguration()
+        {
+            // Mock of configuration for tests
+            var inMemorySettings = new Dictionary<string, string> {
+            {"ConnectionStrings:P3Referential", "Server=localhost\\SQLEXPRESS;Database=TestDatabase;Trusted_Connection=True;"}};
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            return configuration;
+        }
+
+        [Fact]
+        public async Task AddProduct_ShouldAddProductToDatabase()
+        {
+            // Arrange
+            var options = CreateSqlDatabaseOptions();
+            var configuration = CreateMockConfiguration();
+            P3Referential _context = new P3Referential(options, configuration);
+            _context.Database.EnsureDeleted();//delete data base befor creat if to make sure it was clear
+            _context.Database.EnsureCreated();//creat database
+            var productRepository = new ProductRepository(_context);
+
+            var mockCart = new Mock<ICart>();
+            var productService = new ProductService(mockCart.Object, productRepository);
+
+
+            var newProduct = new ProductViewModel
+            {
+                Id = 1,
+                Name = "Test Product",
+                Description = "description",
+                Stock = "10",
+                Price = "20"
+            };
+
+            // Act
+            productService.SaveProduct(newProduct);
+            await _context.SaveChangesAsync();
+
+            // Assert
+            Assert.Equal(1, await _context.Product.CountAsync());
+            Assert.Equal("Test Product", (await _context.Product.FirstAsync()).Name);
+
+            //delet database
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
+        }
+
+        [Fact]
+        public async Task DeletProduct_ShouldRemoveProductToDatabase()
+        {
+            // Arrange
+            var options = CreateSqlDatabaseOptions();
+            var configuration = CreateMockConfiguration();
+            P3Referential _context = new P3Referential(options, configuration);
+            _context.Database.EnsureDeleted();//delete data base befor creat if to make sure it was clear
+            _context.Database.EnsureCreated();//creat database
+            var productRepository = new ProductRepository(_context);
+
+            var mockCart = new Mock<ICart>();
+            var productService = new ProductService(mockCart.Object, productRepository);
+
+
+            var newProduct = new ProductViewModel
+            {
+                Id = 1,
+                Name = "This Test Product Will Be Deleted",
+                Description = "description",
+                Stock = "10",
+                Price = "20"
+            };
+
+            // Act part 1 : Add a product to data base for delet it later
+            productService.SaveProduct(newProduct);
+            await _context.SaveChangesAsync();
+
+            // Assert part 1 : Make sure the product is added to database (if not working, check : AddProduct_ShouldAddProductToDatabase())
+            Assert.Equal(1, await _context.Product.CountAsync());
+            Assert.Equal("This Test Product Will Be Deleted", (await _context.Product.FirstAsync()).Name);
+
+            // Act part 2 : Delet product
+            productService.DeleteProduct(1);//Id = 1 is usless, even if we put Id = 850, the Id of the first product added will be 1
+            await _context.SaveChangesAsync();
+
+            // Assert part 2 : Make sure the product is no longuer in database
+            Assert.Equal(0, await _context.Product.CountAsync());
+
+            //delet database
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
+        }
+        #endregion
 
         /*
         [Fact]
